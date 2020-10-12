@@ -18,11 +18,17 @@ public interface OAuthServerIntf {
     @FormUrlEncoded
     @POST("oauth/access_token")
     Call<String> requestTokenForm(
-            @Field("code") String code,
+            @Field("grant_type") String grant_type,
+
             @Field("client_id") String client_id,
             @Field("client_secret")String client_secret, // Is not relevant for Android application // need PKCE
+
             @Field("redirect_uri") String redirect_uri,
-            @Field("grant_type") String grant_type);
+
+            @Field("code") String code,
+            @Field("code_verifier") String codeVerifier
+    );
+
 
     /**
      * The call to refresh a token

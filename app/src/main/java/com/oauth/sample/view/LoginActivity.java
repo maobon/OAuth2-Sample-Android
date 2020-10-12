@@ -4,16 +4,21 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.oauth.sample.MyApplication;
 import com.oauth.sample.retrofit.OAuthServerIntf;
 import com.oauth.sample.retrofit.RetrofitBuilder;
 import com.oauth.sample.transverse.model.OAuthToken;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.security.MessageDigest;
+import java.util.Objects;
 
 import okhttp3.HttpUrl;
 import retrofit2.Call;
@@ -163,15 +168,30 @@ public class LoginActivity extends AppCompatActivity {
      * Make the Authorization request
      */
     private void makeAuthorizationRequest() {
-        HttpUrl authorizeUrl = HttpUrl.parse("https://github.com/login/oauth/authorize")
-                .newBuilder()
-                .addQueryParameter("response_type", "code")
-                .addQueryParameter("client_id", CLIENT_ID)
-                .addQueryParameter("redirect_uri", REDIRECT_URI)
-                .addQueryParameter("scope", "user public_repo")
+        String codeChallenge;
 
-                //.addQueryParameter("state", "WZojwh9jxVry6hvZ")
-                .build();
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            byte[] digest = messageDigest.digest(MyApplication.instance.getCodeVerifier().getBytes());
+            codeChallenge = Base64.encodeToString(digest, Base64.URL_SAFE | Base64.NO_PADDING);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+
+        HttpUrl authorizeUrl =
+                Objects.requireNonNull(HttpUrl.parse("https://github.com/login/oauth/authorize")).newBuilder()
+                        .addQueryParameter("response_type", "code")
+                        .addQueryParameter("client_id", CLIENT_ID)
+                        .addQueryParameter("redirect_uri", REDIRECT_URI)
+                        .addQueryParameter("scope", "user public_repo")
+
+                        .addQueryParameter("state", "WZojwh9jxVry6hvZ") // 随机
+
+                        .addQueryParameter("code_challenge", codeChallenge)
+                        .addQueryParameter("code_challenge_method", "S256")
+
+                        .build();
 
         Intent i = new Intent(Intent.ACTION_VIEW);
 
@@ -226,11 +246,12 @@ public class LoginActivity extends AppCompatActivity {
         OAuthServerIntf oAuthServer = RetrofitBuilder.getSimpleClient(this);
 
         Call<String> getRequestTokenFormCall = oAuthServer.requestTokenForm(
-                code,
+                GRANT_TYPE_AUTHORIZATION_CODE,
                 CLIENT_ID,
                 CLIENT_SECRET,
                 REDIRECT_URI,
-                GRANT_TYPE_AUTHORIZATION_CODE
+                code,
+                MyApplication.instance.getCodeVerifier()
         );
 
         getRequestTokenFormCall.enqueue(new Callback<String>() {
@@ -239,6 +260,12 @@ public class LoginActivity extends AppCompatActivity {
                 Log.e(TAG, "===============New Call==========================");
 
                 Log.v(TAG, "get accessToken response:" + response.body());
+
+                String serverResponse = response.body();
+                assert serverResponse != null;
+                String accessToken = serverResponse.split("&")[0];
+
+                Toast.makeText(LoginActivity.this, "accessToken=" + accessToken, Toast.LENGTH_SHORT).show();
 
                 //Log.e(TAG, "The call getRequestTokenFormCall succeed with code=" + response.code() + " and has body = " + response.body());
 
