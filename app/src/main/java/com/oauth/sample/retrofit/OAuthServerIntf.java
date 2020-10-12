@@ -1,6 +1,6 @@
 package com.oauth.sample.retrofit;
 
-import com.oauth.sample.transverse.model.OAuthToken;
+import com.oauth.sample.model.OAuthToken;
 
 import retrofit2.Call;
 import retrofit2.http.Field;

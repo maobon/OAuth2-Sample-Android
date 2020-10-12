@@ -1,4 +1,4 @@
-package com.oauth.sample.transverse.model;
+package com.oauth.sample.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -117,6 +117,7 @@ public class OAuthToken {
         private static final String TAG = "OAuthToken.Factory";
 
         public static OAuthToken create() {
+
             long expiredAfter = 0;
 
             SharedPreferences sp = MyApplication.instance.getSharedPreferences(OAUTH_SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);

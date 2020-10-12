@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.oauth.sample.MyApplication;
 import com.oauth.sample.retrofit.OAuthServerIntf;
 import com.oauth.sample.retrofit.RetrofitBuilder;
-import com.oauth.sample.transverse.model.OAuthToken;
+import com.oauth.sample.model.OAuthToken;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -28,62 +28,23 @@ import retrofit2.Response;
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
-    /***********************************************************
-     *  Attributes
-     **********************************************************/
 
-    /**
-     * You client id, you have it from the google console when you register your project
-     * https://console.developers.google.com/a
-     */
-    private static final String CLIENT_ID = "a2d0a6faaaf91bce7c23";
-
-    private static final String CLIENT_SECRET = "3f052b9e96f4d4f33b6b10e1e5b901f7ac7670a5";
-
-    /**
-     * The redirect uri you have define in your google console for your project
-     */
-    private static final String REDIRECT_URI = "com.oauth.sample://oauth2redirect";
-
-    /**
-     * The redirect root uri you have define in your google console for your project
-     * It is also the scheme your Main Activity will react
-     */
-    private static final String REDIRECT_URI_ROOT = "com.oauth.sample";
-
-    /**
-     * You are asking to use a code when autorizing
-     */
-    private static final String CODE = "code";
-
-    /**
-     * You are receiving an error when autorizing, it's embedded in this field
-     */
-    private static final String ERROR_CODE = "error";
-
-    /**
-     * GrantType:You are using a code when retrieveing the token
-     */
     private static final String GRANT_TYPE_AUTHORIZATION_CODE = "authorization_code";
 
-    /**
-     * GrantType:You are using a refresh_token when retrieveing the token
-     */
+    private static final String CLIENT_ID = "a2d0a6faaaf91bce7c23";
+    private static final String CLIENT_SECRET = "3f052b9e96f4d4f33b6b10e1e5b901f7ac7670a5";
+
+    private static final String REDIRECT_URI = "com.oauth.sample://oauth2redirect";
+    private static final String REDIRECT_URI_ROOT = "com.oauth.sample";
+
+    private static final String CODE = "code";
+    private static final String ERROR_CODE = "error";
+
     public static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
 
-    /**
-     * The code returned by the server at the authorization's first step
-     */
     private String code;
-
-    /**
-     * The error returned by the server at the authorization's first step
-     */
     private String error;
 
-    /***********************************************************
-     * Managing Life Cycle
-     **********************************************************/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,20 +69,19 @@ public class LoginActivity extends AppCompatActivity {
         if (data != null && !TextUtils.isEmpty(data.getScheme())) {
             if (REDIRECT_URI_ROOT.equals(data.getScheme())) {
 
-                code = data.getQueryParameter(CODE);
                 error = data.getQueryParameter(ERROR_CODE);
+                if (!TextUtils.isEmpty(error)) {
+                    Toast.makeText(this, "ERROR", Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "onCreate: handle result of authorization with error :" + error);
+                    finish();
+                }
+
+                // code 授权服务器返回的授权码
+                code = data.getQueryParameter(CODE);
                 Log.e(TAG, "onCreate: handle result of authorization with code :" + code);
 
                 if (!TextUtils.isEmpty(code)) {
                     getTokenFormUrl();
-                }
-
-                if (!TextUtils.isEmpty(error)) {
-                    //a problem occurs, the user reject our granting request or something like that
-                    Toast.makeText(this, "ERROR", Toast.LENGTH_LONG).show();
-                    Log.e(TAG, "onCreate: handle result of authorization with error :" + error);
-                    //then die
-                    finish();
                 }
             }
 

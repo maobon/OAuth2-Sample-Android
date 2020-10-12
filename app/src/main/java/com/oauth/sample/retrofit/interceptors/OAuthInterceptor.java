@@ -36,7 +36,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.oauth.sample.MyApplication;
-import com.oauth.sample.transverse.model.OAuthToken;
+import com.oauth.sample.model.OAuthToken;
 import com.oauth.sample.view.MainActivity;
 
 import org.jetbrains.annotations.NotNull;
