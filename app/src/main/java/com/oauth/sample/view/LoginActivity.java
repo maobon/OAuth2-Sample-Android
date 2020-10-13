@@ -11,9 +11,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.oauth.sample.MyApplication;
+import com.oauth.sample.model.OAuthToken;
 import com.oauth.sample.retrofit.OAuthServerIntf;
 import com.oauth.sample.retrofit.RetrofitBuilder;
-import com.oauth.sample.model.OAuthToken;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -50,13 +50,13 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //You can be created either because your user start your application
+        // You can be created either because your user start your application
         //        <intent-filter>
         //            <action android:name="android.intent.action.MAIN" />
         //            <category android:name="android.intent.category.LAUNCHER" />
         //        </intent-filter>
 
-        //either because the callBack of the Authorisation is called :
+        // either because the callBack of the Authorisation is called :
         //        <intent-filter>
         //            <action android:name="android.intent.action.VIEW" />
         //            <category android:name="android.intent.category.BROWSABLE" />
@@ -64,7 +64,7 @@ public class LoginActivity extends AppCompatActivity {
         //            <data android:scheme="com.renaultnissan.githubsample" />
         //        </intent-filter>
 
-        //Manage the callback case:
+        // Manage the callback case:
         Uri data = getIntent().getData();
         if (data != null && !TextUtils.isEmpty(data.getScheme())) {
             if (REDIRECT_URI_ROOT.equals(data.getScheme())) {
@@ -86,21 +86,21 @@ public class LoginActivity extends AppCompatActivity {
             }
 
         } else {
-            //Manage the start application case:
-            //If you don't have a token yet or if your token has expired , ask for it
+            // Manage the start application case:
+            // If you don't have a token yet or if your token has expired , ask for it
 
             OAuthToken oauthToken = OAuthToken.Factory.create();
             if (oauthToken == null || oauthToken.getAccessToken() == null) {
 
-                //first case==first token request
+                // first case==first token request
                 if (oauthToken == null || oauthToken.getRefreshToken() == null) {
                     Log.e(TAG, "onCreate: Launching authorization (first step)");
-                    //first step of OAUth: the authorization step
+                    // first step of OAUth: the authorization step
                     makeAuthorizationRequest();
 
                 } else {
                     Log.e(TAG, "onCreate: refreshing the token :" + oauthToken);
-                    //refresh token case
+                    // refresh token case
                     refreshTokenFormUrl(oauthToken);
                 }
             }
@@ -243,10 +243,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
-
-    /***********************************************************
-     *  Others business methods
-     **********************************************************/
 
     /**
      * Start the next activity
